@@ -74,6 +74,17 @@ setup(
             assert result.returncode == 0, f"Setup.py syntax error: {result.stderr}"
 
 
+def _is_gpu_available():
+    """Check if CUDA or MUSA GPU is available."""
+    import torch
+
+    if torch.cuda.is_available():
+        return True
+    if hasattr(torch, "musa") and torch.musa.is_available():
+        return True
+    return False
+
+
 @pytest.mark.skipif(
     not os.environ.get("TORCHADA_TEST_BUILD", "0") == "1",
     reason="Extension build tests are slow; set TORCHADA_TEST_BUILD=1 to run",
@@ -83,9 +94,7 @@ class TestExtensionBuild:
 
     def test_build_vector_add_extension(self):
         """Test building the vector_add extension."""
-        import torch
-
-        if not torch.cuda.is_available():
+        if not _is_gpu_available():
             pytest.skip("CUDA/MUSA not available")
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -138,7 +147,7 @@ setup(
         """Test running the vector_add extension after building."""
         import torch
 
-        if not torch.cuda.is_available():
+        if not _is_gpu_available():
             pytest.skip("CUDA/MUSA not available")
 
         with tempfile.TemporaryDirectory() as tmpdir:

@@ -64,6 +64,20 @@ class TestTorchCudaModule:
 
             assert count == torch_musa.device_count()
 
+    def test_torch_cuda_device_count_nvml(self):
+        """Test torch.cuda._device_count_nvml() maps to torch.musa.device_count()."""
+        import torch
+
+        import torchada
+
+        if torchada.is_musa_platform():
+            # _device_count_nvml is NVIDIA-specific, should map to device_count on MUSA
+            nvml_count = torch.cuda._device_count_nvml()
+            musa_count = torch.musa.device_count()
+            assert nvml_count == musa_count
+            assert isinstance(nvml_count, int)
+            assert nvml_count >= 0
+
     def test_torch_cuda_current_device(self):
         """Test torch.cuda.current_device() works when GPU available."""
         import torch

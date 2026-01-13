@@ -361,6 +361,12 @@ class _CudaModuleWrapper(ModuleType):
         "StreamContext": "core.stream.StreamContext",
     }
 
+    # Attribute name remappings (CUDA name -> MUSA name)
+    # For CUDA-specific APIs that have different names in MUSA
+    _REMAP_ATTRS = {
+        "_device_count_nvml": "device_count",  # NVML is NVIDIA-specific
+    }
+
     def __init__(self, original_cuda, musa_module):
         super().__init__("torch.cuda")
         self._original_cuda = original_cuda
@@ -377,6 +383,10 @@ class _CudaModuleWrapper(ModuleType):
             for part in self._SPECIAL_ATTRS[name].split("."):
                 obj = getattr(obj, part)
             return obj
+
+        # Handle attribute name remapping (CUDA-specific names -> MUSA equivalents)
+        if name in self._REMAP_ATTRS:
+            return getattr(self._musa_module, self._REMAP_ATTRS[name])
 
         # Redirect everything else to torch.musa
         return getattr(self._musa_module, name)
