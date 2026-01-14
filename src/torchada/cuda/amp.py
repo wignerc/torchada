@@ -37,9 +37,7 @@ def autocast(enabled=True, dtype=None, cache_enabled=True):
     """
     backend = _get_amp_backend()
     if hasattr(backend, "autocast"):
-        return backend.autocast(
-            enabled=enabled, dtype=dtype, cache_enabled=cache_enabled
-        )
+        return backend.autocast(enabled=enabled, dtype=dtype, cache_enabled=cache_enabled)
     else:
         # Use torch.autocast with appropriate device type
         import torch

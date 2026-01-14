@@ -21,6 +21,7 @@ torchada provides a unified interface that works transparently on both Moore Thr
 - **Mixed Precision**: `torch.cuda.amp` autocast and GradScaler work transparently
 - **CUDA Graphs**: `torch.cuda.CUDAGraph` maps to `MUSAGraph` on MUSA
 - **Inductor Support**: `torch._inductor` autotune uses `MUSA_VISIBLE_DEVICES` on MUSA
+- **NVML Compatibility**: `torch.cuda._device_count_nvml()` maps to `torch.musa.device_count()`
 
 ## Installation
 
@@ -185,6 +186,7 @@ After `import torchada`, the following standard PyTorch APIs work on MUSA:
 | `torch.cuda.nccl` | Maps to `torch.musa.mccl` |
 | `torch.cuda.nvtx` | No-op stub (MUSA doesn't have nvtx) |
 | `torch.cuda._lazy_call` | Patched for lazy initialization |
+| `torch.cuda._device_count_nvml()` | Maps to `torch.musa.device_count()` |
 | `torch.distributed` (backend='nccl') | Automatically uses MCCL |
 | `torch.device("cuda")` | Creates MUSA device on MUSA platform |
 | `tensor.cuda()` | Moves to MUSA device |

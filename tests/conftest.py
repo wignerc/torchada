@@ -15,9 +15,7 @@ def pytest_configure(config):
     """Configure pytest with custom markers."""
     config.addinivalue_line("markers", "musa: mark test as requiring MUSA platform")
     config.addinivalue_line("markers", "cuda: mark test as requiring CUDA platform")
-    config.addinivalue_line(
-        "markers", "gpu: mark test as requiring any GPU (CUDA or MUSA)"
-    )
+    config.addinivalue_line("markers", "gpu: mark test as requiring any GPU (CUDA or MUSA)")
     config.addinivalue_line("markers", "slow: mark test as slow")
 
 
