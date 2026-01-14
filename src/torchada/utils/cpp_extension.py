@@ -25,6 +25,7 @@ Usage (preferred):
     )
 """
 
+import logging
 import os
 import re
 from typing import Any, Dict, List, Optional
@@ -95,6 +96,32 @@ def _is_musa_file(path: str) -> bool:
     return ext in [".cu", ".cuh", ".mu", ".muh"]
 
 
+def _patch_simple_porting_load_replaced_mapping(musa_sp):
+    """
+    Patch SimplePorting.load_replaced_mapping to suppress unwanted print output.
+
+    Some versions of torch_musa have `print(self.mapping_rule)` in this method.
+    This patch wraps the method to redirect stdout during execution.
+
+    This is forward-compatible: if future versions remove the print, this still works.
+    """
+    import io
+    import sys
+
+    original_method = musa_sp.SimplePorting.load_replaced_mapping
+
+    def patched_load_replaced_mapping(self):
+        # Temporarily redirect stdout to suppress the print
+        old_stdout = sys.stdout
+        sys.stdout = io.StringIO()
+        try:
+            return original_method(self)
+        finally:
+            sys.stdout = old_stdout
+
+    musa_sp.SimplePorting.load_replaced_mapping = patched_load_replaced_mapping
+
+
 def _apply_musa_patches():
     """
     Apply patches to torch_musa modules for CUDA compatibility.
@@ -128,6 +155,11 @@ def _apply_musa_patches():
         # This is the critical patch that enables source code porting
         musa_sp._MAPPING_RULE = _MAPPING_RULE
 
+        # Patch load_replaced_mapping to suppress print(self.mapping_rule)
+        # Some versions of torch_musa have an extra print statement that we want to disable
+        # This patch is forward-compatible - if the print is removed, this still works
+        _patch_simple_porting_load_replaced_mapping(musa_sp)
+
         _musa_patches_applied = True
 
     except ImportError:
@@ -143,9 +175,7 @@ _apply_musa_patches()
 CUDA_HOME = _get_cuda_home()
 
 
-def _port_cuda_source(
-    source_code: str, mapping_rules: Optional[Dict[str, str]] = None
-) -> str:
+def _port_cuda_source(source_code: str, mapping_rules: Optional[Dict[str, str]] = None) -> str:
     """
     Port CUDA source code to MUSA by applying mapping rules.
 
@@ -429,6 +459,7 @@ def _get_build_extension_class():
 
                     source_dir = os.path.abspath(source_dir)
                     if source_dir not in self._ported_dirs:
+                        musa_sp.LOGGER.setLevel(logging.ERROR)
                         musa_sp.SimplePorting(
                             cuda_dir_path=source_dir, mapping_rule=mapping_rule
                         ).run()
@@ -485,7 +516,10 @@ def _get_build_extension_class():
 
                         # First pass: identify directories that need porting
                         for source in ext.sources:
-                            new_source, needs_porting = self._convert_source_path(source)
+                            (
+                                new_source,
+                                needs_porting,
+                            ) = self._convert_source_path(source)
                             new_sources.append(new_source)
                             if needs_porting:
                                 source_dir = os.path.dirname(os.path.abspath(source))
@@ -518,7 +552,14 @@ def _get_build_extension_class():
                                     try:
                                         for root, dirs, files in os.walk(inc_dir_abs):
                                             for f in files:
-                                                if f.endswith((".h", ".hpp", ".cuh", ".cu")):
+                                                if f.endswith(
+                                                    (
+                                                        ".h",
+                                                        ".hpp",
+                                                        ".cuh",
+                                                        ".cu",
+                                                    )
+                                                ):
                                                     has_cuda_headers = True
                                                     break
                                             if has_cuda_headers:

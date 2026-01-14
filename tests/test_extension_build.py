@@ -138,9 +138,7 @@ setup(
             assert result.returncode == 0, f"Build failed: {result.stderr}"
 
             # Check that the extension was built
-            ext_files = [
-                f for f in os.listdir(tmpdir) if f.endswith(".so") or f.endswith(".pyd")
-            ]
+            ext_files = [f for f in os.listdir(tmpdir) if f.endswith(".so") or f.endswith(".pyd")]
             assert len(ext_files) > 0, "No extension file was built"
 
     def test_run_vector_add_extension(self):

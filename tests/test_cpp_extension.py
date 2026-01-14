@@ -54,9 +54,7 @@ class TestCppExtensionImports:
 
         if torchada.is_musa_platform():
             # Verify CUDAExtension is our patched version
-            assert (
-                torch_cpp_ext.CUDAExtension.__module__ == "torchada.utils.cpp_extension"
-            )
+            assert torch_cpp_ext.CUDAExtension.__module__ == "torchada.utils.cpp_extension"
 
     def test_torch_cpp_extension_cuda_home_same_as_torchada(self):
         """Test that torch.utils.cpp_extension.CUDA_HOME matches torchada's."""

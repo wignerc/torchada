@@ -105,9 +105,7 @@ class TestCuBLASMappings:
         from torchada._mapping import _MAPPING_RULE
 
         assert _MAPPING_RULE["cublasGemmBatchedEx"] == "mublasGemmBatchedEx"
-        assert (
-            _MAPPING_RULE["cublasGemmStridedBatchedEx"] == "mublasGemmStridedBatchedEx"
-        )
+        assert _MAPPING_RULE["cublasGemmStridedBatchedEx"] == "mublasGemmStridedBatchedEx"
         assert _MAPPING_RULE["cublasSgemmBatched"] == "mublasSgemmBatched"
         assert _MAPPING_RULE["cublasDgemmBatched"] == "mublasDgemmBatched"
 
@@ -133,9 +131,7 @@ class TestCuRANDMappings:
         from torchada._mapping import _MAPPING_RULE
 
         assert _MAPPING_RULE["curandState"] == "murandState"
-        assert (
-            _MAPPING_RULE["curandStatePhilox4_32_10_t"] == "murandStatePhilox4_32_10_t"
-        )
+        assert _MAPPING_RULE["curandStatePhilox4_32_10_t"] == "murandStatePhilox4_32_10_t"
 
     def test_curand_functions(self):
         from torchada._mapping import _MAPPING_RULE
@@ -245,10 +241,7 @@ class TestStreamEventMappings:
         assert _MAPPING_RULE["cudaStreamDefault"] == "musaStreamDefault"
         assert _MAPPING_RULE["cudaStreamNonBlocking"] == "musaStreamNonBlocking"
         assert _MAPPING_RULE["cudaStreamCreateWithFlags"] == "musaStreamCreateWithFlags"
-        assert (
-            _MAPPING_RULE["cudaStreamCreateWithPriority"]
-            == "musaStreamCreateWithPriority"
-        )
+        assert _MAPPING_RULE["cudaStreamCreateWithPriority"] == "musaStreamCreateWithPriority"
 
     def test_event_functions(self):
         from torchada._mapping import _MAPPING_RULE
@@ -474,10 +467,7 @@ class TestPyTorchCppMappings:
             _MAPPING_RULE["torch::cuda::getDefaultCUDAStream"]
             == "torch::musa::getDefaultMUSAStream"
         )
-        assert (
-            _MAPPING_RULE["torch::cuda::getStreamFromPool"]
-            == "torch::musa::getStreamFromPool"
-        )
+        assert _MAPPING_RULE["torch::cuda::getStreamFromPool"] == "torch::musa::getStreamFromPool"
 
 
 class TestMappingCount:
@@ -525,9 +515,7 @@ class TestMappingRobustness:
 
         for key, value in _MAPPING_RULE.items():
             assert isinstance(key, str), f"Key is not a string: {key}"
-            assert isinstance(
-                value, str
-            ), f"Value is not a string for key {key}: {value}"
+            assert isinstance(value, str), f"Value is not a string for key {key}: {value}"
 
     def test_cuda_to_musa_consistency(self):
         """Test that CUDA terms consistently map to MUSA equivalents."""
@@ -546,14 +534,16 @@ class TestMappingRobustness:
             # If key contains 'cuda' (case insensitive), value should contain 'musa'
             if "cuda" in key.lower() and "musa" not in value.lower():
                 # Allow mappings where cuda -> privateuseone or similar
-                if (
-                    "privateuseone" not in value.lower()
-                    and "private" not in value.lower()
-                ):
+                if "privateuseone" not in value.lower() and "private" not in value.lower():
                     # Check for special patterns
                     if not any(
                         x in value.lower()
-                        for x in ["musa", "privateuseone", "ignore", "torch_musa"]
+                        for x in [
+                            "musa",
+                            "privateuseone",
+                            "ignore",
+                            "torch_musa",
+                        ]
                     ):
                         pytest.fail(
                             f"Inconsistent mapping: '{key}' -> '{value}' "
@@ -642,7 +632,9 @@ int main() {
         """Test NCCL to MCCL replacement."""
         from torchada.utils.cpp_extension import _port_cuda_source
 
-        source = "ncclComm_t comm; ncclAllReduce(buffer, buffer, count, datatype, op, comm, stream);"
+        source = (
+            "ncclComm_t comm; ncclAllReduce(buffer, buffer, count, datatype, op, comm, stream);"
+        )
         result = _port_cuda_source(source)
         assert "mcclComm_t" in result
         assert "mcclAllReduce" in result
