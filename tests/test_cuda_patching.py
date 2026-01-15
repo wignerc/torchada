@@ -697,6 +697,44 @@ class TestTorchGenerator:
             assert gen is not None
             assert gen.device.type == "musa"
 
+    def test_generator_isinstance_check(self):
+        """Test isinstance(gen, torch.Generator) works correctly.
+
+        This is a regression test for sglang integration where
+        generator_or_list_generators() was returning False because
+        isinstance() wasn't working with the wrapped Generator class.
+
+        The fix uses a metaclass with __instancecheck__ so isinstance() works.
+        """
+        import torch
+
+        import torchada  # noqa: F401
+
+        # Create generators
+        gen_cpu = torch.Generator()
+        gen_cuda = torch.Generator(device="cuda")
+
+        # isinstance should work for both CPU and CUDA/MUSA generators
+        assert isinstance(gen_cpu, torch.Generator), "CPU generator isinstance check failed"
+        assert isinstance(gen_cuda, torch.Generator), "CUDA/MUSA generator isinstance check failed"
+
+        # Test with a list (like sglang's generator_or_list_generators does)
+        gens = [gen_cpu, gen_cuda]
+        assert all(
+            isinstance(g, torch.Generator) for g in gens
+        ), "List of generators isinstance check failed"
+
+    def test_generator_isinstance_negative(self):
+        """Test isinstance returns False for non-Generator objects."""
+        import torch
+
+        import torchada  # noqa: F401
+
+        assert not isinstance("not a generator", torch.Generator)
+        assert not isinstance(42, torch.Generator)
+        assert not isinstance(None, torch.Generator)
+        assert not isinstance(torch.tensor([1, 2, 3]), torch.Generator)
+
 
 class TestTorchVersionCuda:
     """Test torch.version.cuda is NOT patched.
